@@ -59,6 +59,8 @@ blink_core_sources("page") {
     "print_context.h",
     "scoped_page_pauser.cc",
     "scoped_page_pauser.h",
+    "scoped_page_mummifier.cc",
+    "scoped_page_mummifier.h",
     "scrolling/overscroll_controller.cc",
     "scrolling/overscroll_controller.h",
     "scrolling/root_scroller_controller.cc",

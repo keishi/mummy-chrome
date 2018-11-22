@@ -265,6 +265,10 @@ def parse_args(args):
                 action='store_true',
                 help='Enable the leak detection of DOM objects.'),
             optparse.make_option(
+                '--count-wrapper',
+                action='store_true',
+                help='Enable the leak detection of DOM objects.'),
+            optparse.make_option(
                 '--enable-sanitizer',
                 action='store_true',
                 help='Only alert on sanitizer-related errors and crashes'),

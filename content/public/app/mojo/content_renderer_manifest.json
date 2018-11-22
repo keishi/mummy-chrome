@@ -10,6 +10,7 @@
           "blink.mojom.LeakDetector",
           "blink.mojom.OomIntervention",
           "blink.mojom.WebDatabase",
+          "blink.mojom.WrapperCounter",
           "content.mojom.AppCacheFrontend",
           "content.mojom.Child",
           "content.mojom.ChildControl",

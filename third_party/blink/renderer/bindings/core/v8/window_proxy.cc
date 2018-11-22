@@ -74,6 +74,10 @@ void WindowProxy::ClearForSwap() {
   DisposeContext(Lifecycle::kGlobalObjectIsDetached, kFrameWillNotBeReused);
 }
 
+void WindowProxy::ClearForMummification() {
+  ReleaseContext(true);
+}
+
 v8::Local<v8::Object> WindowProxy::GlobalProxyIfNotDetached() {
   if (lifecycle_ == Lifecycle::kContextIsInitialized) {
     DLOG_IF(FATAL, !is_global_object_attached_)
@@ -93,8 +97,12 @@ v8::Local<v8::Object> WindowProxy::ReleaseGlobalProxy() {
       << "Context not detached by calling clearForNavigation()";
 
   v8::Local<v8::Object> global_proxy = global_proxy_.NewLocal(isolate_);
-  global_proxy_.Clear();
+  ClearGlobalProxy();
   return global_proxy;
+}
+
+void WindowProxy::ClearGlobalProxy() {
+  global_proxy_.Clear();
 }
 
 void WindowProxy::SetGlobalProxy(v8::Local<v8::Object> global_proxy) {

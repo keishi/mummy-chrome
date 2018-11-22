@@ -125,6 +125,8 @@ jumbo_static_library("content_shell_lib") {
     "browser/layout_test/layout_test_url_request_context_getter.h",
     "browser/layout_test/leak_detector.cc",
     "browser/layout_test/leak_detector.h",
+    "browser/layout_test/wrapper_counter.cc",
+    "browser/layout_test/wrapper_counter.h",
     "browser/layout_test/mojo_layout_test_helper.cc",
     "browser/layout_test/mojo_layout_test_helper.h",
     "browser/layout_test/secondary_test_window_observer.cc",

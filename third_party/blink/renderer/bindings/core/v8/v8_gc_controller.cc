@@ -353,6 +353,50 @@ void V8GCController::CollectAllGarbageForTesting(
 
 namespace {
 
+class PersistentLeakTracer final : public v8::PersistentHandleVisitor {
+ public:
+  explicit PersistentLeakTracer() {
+  }
+
+  void VisitPersistentHandle(v8::Persistent<v8::Value>* value,
+                             uint16_t class_id) final {
+    if (IsDOMWrapperClassId(class_id)) {
+    WrapperTypeInfo* wrapper_type_info = const_cast<WrapperTypeInfo*>(
+        ToWrapperTypeInfo(v8::Persistent<v8::Object>::Cast(*value)));
+        if (wrapper_type_info) {
+          LOG(ERROR) << "wrapper_type_info = " << wrapper_type_info->interface_name;
+        } else {
+          LOG(ERROR) << "empty wrapper_type_info";
+        }
+    }
+  }
+};
+
+class PersistentCountTracer final : public v8::PersistentHandleVisitor {
+ public:
+  explicit PersistentCountTracer() {}
+
+  void VisitPersistentHandle(v8::Persistent<v8::Value>* value,
+                             uint16_t class_id) final {
+    count_++;
+    if (IsDOMWrapperClassId(class_id)) {
+      dom_wrapper_count_++;
+    }
+    if (value->IsWeak()) {
+      weak_count_++;
+    }
+  }
+
+  int count() { return count_; }
+  int dom_wrapper_count() { return dom_wrapper_count_; }
+  int weak_count() { return weak_count_; }
+
+ private:
+  int count_ = 0;
+  int dom_wrapper_count_ = 0;
+  int weak_count_ = 0;
+};
+
 // Traces all DOM persistent handles using the provided visitor.
 class DOMWrapperTracer final : public v8::PersistentHandleVisitor {
  public:
@@ -409,6 +453,17 @@ class DOMWrapperPurger final : public v8::PersistentHandleVisitor {
 };
 
 }  // namespace
+
+void V8GCController::FindPersistentLeaks(v8::Isolate* isolate) {
+  LOG(ERROR) << "V8GCController::FindPersistentLeaks";
+  v8::PrintGlobalHandles(isolate);
+}
+
+int V8GCController::CountDOMWrappers(v8::Isolate* isolate) {
+  PersistentCountTracer tracer;
+  isolate->VisitHandlesWithClassIds(&tracer);
+  return tracer.count();
+}
 
 void V8GCController::TraceDOMWrappers(v8::Isolate* isolate, Visitor* visitor) {
   DOMWrapperTracer tracer(visitor);

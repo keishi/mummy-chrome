@@ -59,7 +59,7 @@ class DriverOutput(object):
 
     def __init__(self, text, image, image_hash, audio, crash=False,
                  test_time=0, measurements=None, timeout=False, error='', crashed_process_name='??',
-                 crashed_pid=None, crash_log=None, crash_site=None, leak=False, leak_log=None, pid=None):
+                 crashed_pid=None, crash_log=None, crash_site=None, leak=False, leak_log=None, wrapper=False, wrapper_log=None, pid=None):
         # FIXME: Args could be renamed to better clarify what they do.
         self.text = text
         self.image = image  # May be empty-string if the test crashes.
@@ -73,6 +73,8 @@ class DriverOutput(object):
         self.crash_site = crash_site
         self.leak = leak
         self.leak_log = leak_log
+        self.wrapper = wrapper
+        self.wrapper_log = wrapper_log
         self.test_time = test_time
         self.measurements = measurements
         self.timeout = timeout
@@ -119,6 +121,8 @@ class Driver(object):
         # "#LEAK". This leak detection is enabled only when the flag
         # --enable-leak-detection is passed to content_shell.
         self._leaked = False
+
+        self._wrapper = False
 
         # stderr reading is scoped on a per-test (not per-block) basis, so we store the accumulated
         # stderr output, as well as if we've seen #EOF on this driver instance.
@@ -171,6 +175,7 @@ class Driver(object):
         timed_out = self._server_process.timed_out
         pid = self._server_process.pid()
         leaked = self._leaked
+        wrapper = self._wrapper
 
         if not crashed:
             sanitizer = self._port.output_contains_sanitizer_messages(self.error_from_test)
@@ -181,7 +186,7 @@ class Driver(object):
                 self._crashed_process_name = 'unknown process name'
                 self._crashed_pid = 0
 
-        if crashed or timed_out or leaked:
+        if crashed or timed_out or leaked or wrapper:
             # We call stop() even if we crashed or timed out in order to get any remaining stdout/stderr output.
             # In the timeout case, we kill the hung process as well.
             out, err = self._server_process.stop(0.0)
@@ -213,7 +218,7 @@ class Driver(object):
                             timeout=timed_out, error=self.error_from_test,
                             crashed_process_name=self._crashed_process_name,
                             crashed_pid=self._crashed_pid, crash_log=crash_log, crash_site=crash_site,
-                            leak=leaked, leak_log=self._leak_log,
+                            leak=leaked, leak_log=self._leak_log, wrapper=wrapper, wrapper_log = self._wrapper_log,
                             pid=pid)
 
     def _get_crash_log(self, stdout, stderr, newer_than):
@@ -325,6 +330,8 @@ class Driver(object):
         self._crashed_pid = None
         self._leaked = False
         self._leak_log = None
+        self._wrapper = False
+        self._wrapper_log = None
         cmd_line = self.cmd_line(per_test_args)
         self._server_process = self._port.server_process_constructor(
             self._port, server_name, cmd_line, environment, more_logging=self._port.get_option('driver_logging'))
@@ -390,6 +397,8 @@ class Driver(object):
         cmd.extend(self._port.additional_driver_flags())
         if self._port.get_option('enable_leak_detection'):
             cmd.append('--enable-leak-detection')
+        if self._port.get_option('count_wrapper'):
+            cmd.append('--count-wrapper')
         cmd.extend(per_test_args)
         cmd.append('-')
         return cmd
@@ -424,6 +433,15 @@ class Driver(object):
             match = re.match(r'#LEAK - (\S+) pid (\d+) (.+)\n', error_line)
             self._leak_log = match.group(3)
         return self._leaked
+
+    def _check_for_wrapper(self, error_line):
+        self._wrapper = True
+        self._wrapper_log = "xxxxx"
+        #if error_line.startswith('#WRAPPER - '):
+        #    self._wrapper = True
+        #    match = re.match(r'#WRAPPER - (\S+) pid (\d+) (.+)\n', error_line)
+        #    self._wrapper_log = match.group(3)
+        return self._wrapper
 
     def _command_from_driver_input(self, driver_input):
         # FIXME: performance tests pass in full URLs instead of test names.
@@ -536,6 +554,8 @@ class Driver(object):
                 if self._check_for_driver_crash(err_line):
                     break
                 if self._check_for_leak(err_line):
+                    break
+                if self._check_for_wrapper(err_line):
                     break
                 self.error_from_test += err_line
 

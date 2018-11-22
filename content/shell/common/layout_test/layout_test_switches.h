@@ -27,6 +27,7 @@ extern const char kEnableAccelerated2DCanvas[];
 extern const char kEnableFontAntialiasing[];
 extern const char kAlwaysUseComplexText[];
 extern const char kEnableLeakDetection[];
+extern const char kCountWrapperObjects[];
 extern const char kEncodeBinary[];
 extern const char kRunWebTests[];
 extern const char kStableReleaseMode[];

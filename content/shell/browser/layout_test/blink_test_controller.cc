@@ -338,6 +338,11 @@ BlinkTestController::BlinkTestController()
     crash_when_leak_found_ = switchValue == switches::kCrashOnFailure;
   }
 
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kCountWrapperObjects )) {
+    wrapper_counter_ = std::make_unique<WrapperCounter>();
+  }
+
   printer_.reset(new BlinkTestResultPrinter(&std::cout, &std::cerr));
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
           switches::kEncodeBinary))
@@ -590,8 +595,18 @@ void BlinkTestController::OnTestFinishedInSecondaryRenderer() {
 
 void BlinkTestController::OnInitiateCaptureDump(bool capture_navigation_history,
                                                 bool capture_pixels) {
+  LOG(ERROR) << "BlinkTestController::OnInitiateCaptureDump";
   if (test_phase_ != DURING_TEST)
     return;
+
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kCountWrapperObjects)) {
+    RenderViewHost* rvh = main_window_->web_contents()->GetRenderViewHost();
+    wrapper_counter_->BindInterface(rvh->GetProcess(),
+      base::BindOnce(&BlinkTestController::OnCountWrappersDone,
+                     weak_factory_.GetWeakPtr()));
+    LOG(ERROR) << "BlinkTestController::OnInitiateCaptureDump TryWrapperCounts";
+    wrapper_counter_->TryWrapperCounts();
+  }
 
   if (capture_navigation_history) {
     RenderFrameHost* main_rfh = main_window_->web_contents()->GetMainFrame();
@@ -981,6 +996,9 @@ void BlinkTestController::HandleNewRenderFrameHost(RenderFrameHost* frame) {
 
 void BlinkTestController::OnTestFinished() {
   test_phase_ = CLEAN_UP;
+}
+
+void BlinkTestController::ContentOfOnTestFinished() {
   if (!printer_->output_finished())
     printer_->PrintImageFooter();
   if (main_window_)
@@ -1298,6 +1316,20 @@ void BlinkTestController::OnSetBluetoothManualChooser(bool enable) {
   if (enable) {
     bluetooth_chooser_factory_.reset(new LayoutTestBluetoothChooserFactory());
   }
+}
+
+void BlinkTestController::OnCountWrappersDone(
+  const WrapperCounter::WrapperCounterReport& report) {
+  LOG(ERROR) << "BlinkTestController::OnCountWrappersDone";
+  if (report.none) {
+    LOG(ERROR) << "no remaining wrapper";
+    ContentOfOnTestFinished();
+    return;
+  }
+  printer_->AddErrorMessage(base::StringPrintf(
+    "#WRAPPER - renderer pid %d (%s)", current_pid_, report.detail.c_str()));
+  LOG(ERROR) << report.detail.c_str();
+  ContentOfOnTestFinished();
 }
 
 void BlinkTestController::OnGetBluetoothManualChooserEvents() {

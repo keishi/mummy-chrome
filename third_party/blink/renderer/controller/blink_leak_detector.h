@@ -13,6 +13,8 @@
 
 namespace blink {
 
+class ScopedPageMummifier;
+
 // Implementation of Leak Detector.
 class CONTROLLER_EXPORT BlinkLeakDetector : public mojom::blink::LeakDetector {
  public:
@@ -24,6 +26,8 @@ class CONTROLLER_EXPORT BlinkLeakDetector : public mojom::blink::LeakDetector {
  private:
   // mojom::blink::LeakDetector implementation.
   void PerformLeakDetection(PerformLeakDetectionCallback) override;
+  void Mummify() override;
+  void Demummify() override;
 
   void TimerFiredGC(TimerBase*);
   void ReportResult();
@@ -31,6 +35,7 @@ class CONTROLLER_EXPORT BlinkLeakDetector : public mojom::blink::LeakDetector {
   TaskRunnerTimer<BlinkLeakDetector> delayed_gc_timer_;
   int number_of_gc_needed_ = 0;
   PerformLeakDetectionCallback callback_;
+  std::unique_ptr<ScopedPageMummifier> scoped_page_mummifier_;
 
   DISALLOW_COPY_AND_ASSIGN(BlinkLeakDetector);
 };

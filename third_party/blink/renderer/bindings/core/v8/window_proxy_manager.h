@@ -29,6 +29,7 @@ class WindowProxyManager : public GarbageCollected<WindowProxyManager> {
   void ClearForClose();
   void CORE_EXPORT ClearForNavigation();
   void ClearForSwap();
+  void ClearForMummification();
 
   // Global proxies are passed in a vector to maintain their order: global proxy
   // object for the main world is always first. This is needed to prevent bugs
@@ -37,6 +38,7 @@ class WindowProxyManager : public GarbageCollected<WindowProxyManager> {
       Vector<std::pair<DOMWrapperWorld*, v8::Local<v8::Object>>>;
   void CORE_EXPORT ReleaseGlobalProxies(GlobalProxyVector&);
   void CORE_EXPORT SetGlobalProxies(const GlobalProxyVector&);
+  void ClearGlobalProxies();
 
   WindowProxy* MainWorldProxy() {
     window_proxy_->InitializeIfNeeded();

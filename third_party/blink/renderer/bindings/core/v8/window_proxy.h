@@ -153,9 +153,11 @@ class WindowProxy : public GarbageCollectedFinalized<WindowProxy> {
   void ClearForClose();
   void ClearForNavigation();
   void ClearForSwap();
+  void ClearForMummification();
 
   CORE_EXPORT v8::Local<v8::Object> GlobalProxyIfNotDetached();
   v8::Local<v8::Object> ReleaseGlobalProxy();
+  void ClearGlobalProxy();
   void SetGlobalProxy(v8::Local<v8::Object>);
 
   // TODO(dcheng): Temporarily exposed to avoid include cycles. Remove the need
@@ -232,6 +234,7 @@ class WindowProxy : public GarbageCollectedFinalized<WindowProxy> {
   virtual void Initialize() = 0;
 
   virtual void DisposeContext(Lifecycle next_status, FrameReuseStatus) = 0;
+  virtual void ReleaseContext(bool detach_global_object) = 0;
 
   WARN_UNUSED_RESULT v8::Local<v8::Object> AssociateWithWrapper(
       DOMWindow*,

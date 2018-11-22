@@ -31,6 +31,7 @@
 #include "content/public/browser/web_contents_observer.h"
 #include "content/public/common/web_preferences.h"
 #include "content/shell/browser/layout_test/leak_detector.h"
+#include "content/shell/browser/layout_test/wrapper_counter.h"
 #include "content/shell/common/layout_test.mojom.h"
 #include "ui/gfx/geometry/size.h"
 
@@ -213,6 +214,7 @@ class BlinkTestController : public WebContentsObserver,
   void OnOverridePreferences(const WebPreferences& prefs);
   void OnSetPopupBlockingEnabled(bool block_popups);
   void OnTestFinished();
+  void ContentOfOnTestFinished();
   void OnNavigateSecondaryWindow(const GURL& url);
   void OnGoToOffset(int offset);
   void OnReload();
@@ -221,6 +223,7 @@ class BlinkTestController : public WebContentsObserver,
   void OnCloseRemainingWindows();
   void OnResetDone();
   void OnLeakDetectionDone(const LeakDetector::LeakDetectionReport& report);
+  void OnCountWrappersDone(const WrapperCounter::WrapperCounterReport& report);
   void OnSetBluetoothManualChooser(bool enable);
   void OnGetBluetoothManualChooserEvents();
   void OnSendBluetoothManualChooserEvent(const std::string& event,
@@ -299,6 +302,8 @@ class BlinkTestController : public WebContentsObserver,
 
   bool crash_when_leak_found_;
   std::unique_ptr<LeakDetector> leak_detector_;
+
+  std::unique_ptr<WrapperCounter> wrapper_counter_;
 
   std::unique_ptr<LayoutTestBluetoothChooserFactory> bluetooth_chooser_factory_;
 

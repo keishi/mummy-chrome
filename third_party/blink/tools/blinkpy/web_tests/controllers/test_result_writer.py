@@ -70,6 +70,8 @@ def write_test_result(filesystem, port, results_directory, test_name, driver_out
             writer.write_crash_log(crashed_driver_output.crash_log)
         elif isinstance(failure, test_failures.FailureLeak):
             writer.write_leak_log(driver_output.leak_log)
+        elif isinstance(failure, test_failures.FailureWrapper):
+            writer.write_wrapper_log(driver_output.wrapper_log)
         elif isinstance(failure, (
                 test_failures.FailureReftestMismatch,
                 test_failures.FailureReftestNoImageGenerated,
@@ -110,6 +112,7 @@ class TestResultWriter(object):
     FILENAME_SUFFIX_CRASH_LOG = "-crash-log"
     FILENAME_SUFFIX_SAMPLE = "-sample"
     FILENAME_SUFFIX_LEAK_LOG = "-leak-log"
+    FILENAME_SUFFIX_WRAPPER_LOG = "-wrapper-log"
     FILENAME_SUFFIX_HTML_DIFF = "-pretty-diff"
     FILENAME_SUFFIX_OVERLAY = "-overlay"
 
@@ -174,6 +177,10 @@ class TestResultWriter(object):
     def write_leak_log(self, leak_log):
         filename = self._output_abspath(self.FILENAME_SUFFIX_LEAK_LOG, ".txt")
         self._write_file(filename, leak_log)
+
+    def write_wrapper_log(self, wrapper_log):
+        filename = self._output_abspath(self.FILENAME_SUFFIX_WRAPPER_LOG, ".txt")
+        self._write_file(filename, wrapper_log)
 
     def copy_sample_file(self, sample_file):
         filename = self._output_abspath(self.FILENAME_SUFFIX_SAMPLE, ".txt")

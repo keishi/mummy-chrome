@@ -32,6 +32,7 @@ mojom("mojom_platform") {
     "frame/find_in_page.mojom",
     "frame/navigation_initiator.mojom",
     "leak_detector/leak_detector.mojom",
+    "leak_detector/wrapper_counter.mojom",
     "loader/code_cache.mojom",
     "loader/navigation_predictor.mojom",
     "loader/pause_subresource_loading_handle.mojom",

@@ -21,6 +21,7 @@
 #include "third_party/blink/renderer/platform/instance_counters.h"
 #include "third_party/blink/renderer/platform/loader/fetch/memory_cache.h"
 #include "third_party/blink/renderer/platform/loader/fetch/resource_fetcher.h"
+#include "third_party/blink/renderer/core/page/scoped_page_mummifier.h"
 
 namespace blink {
 
@@ -153,6 +154,15 @@ void BlinkLeakDetector::ReportResult() {
 #endif
 
   std::move(callback_).Run(std::move(result));
+}
+
+void BlinkLeakDetector::Mummify() {
+    scoped_page_mummifier_ = std::make_unique<ScopedPageMummifier>();
+}
+
+void BlinkLeakDetector::Demummify() {
+    CHECK(scoped_page_mummifier_);
+    scoped_page_mummifier_ = nullptr;
 }
 
 }  // namespace blink

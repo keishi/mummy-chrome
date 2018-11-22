@@ -66,6 +66,8 @@ def determine_result_type(failure_list):
         return test_expectations.CRASH
     elif has_failure_type(FailureLeak, failure_list):
         return test_expectations.LEAK
+    elif has_failure_type(FailureWrapper, failure_list):
+        return test_expectations.WRAPPER
     elif has_failure_type(FailureTimeout, failure_list):
         return test_expectations.TIMEOUT
     elif has_failure_type(FailureEarlyExit, failure_list):
@@ -167,6 +169,15 @@ class FailureLeak(TestFailure):
     def message(self):
         return 'leak detected: %s' % (self.log)
 
+class FailureWrapper(TestFailure):
+
+    def __init__(self, is_reftest=False, log=''):
+        super(FailureWrapper, self).__init__()
+        self.is_reftest = is_reftest
+        self.log = log
+
+    def message(self):
+        return 'remaining wrappers detected: %s' % (self.log)
 
 class FailureMissingResult(TestFailure):
 

@@ -42,6 +42,7 @@ const char kAlwaysUseComplexText[] = "always-use-complex-text";
 // Enables the leak detection of loading webpages. This allows us to check
 // whether or not reloading a webpage releases web-related objects correctly.
 const char kEnableLeakDetection[] = "enable-leak-detection";
+const char kCountWrapperObjects[] = "count-wrapper";
 
 // Encode binary layout test results (images, audio) using base64.
 const char kEncodeBinary[] = "encode-binary";

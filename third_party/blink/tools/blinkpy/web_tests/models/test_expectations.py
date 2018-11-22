@@ -43,8 +43,8 @@ _log = logging.getLogger(__name__)
 #
 # FIXME: range() starts with 0 which makes if expectation checks harder
 # as PASS is 0.
-(PASS, FAIL, TEXT, IMAGE, IMAGE_PLUS_TEXT, AUDIO, TIMEOUT, CRASH, LEAK, SKIP, WONTFIX,
- SLOW, MISSING, FLAKY, NOW, NONE) = range(16)
+(PASS, FAIL, TEXT, IMAGE, IMAGE_PLUS_TEXT, AUDIO, TIMEOUT, CRASH, LEAK, WRAPPER, SKIP, WONTFIX,
+ SLOW, MISSING, FLAKY, NOW, NONE) = range(17)
 
 WEBKIT_BUG_PREFIX = 'webkit.org/b/'
 CHROMIUM_BUG_PREFIX = 'crbug.com/'
@@ -287,6 +287,7 @@ class TestExpectationLine(object):
     _expectation_tokens = {
         'Crash': 'CRASH',
         'Leak': 'LEAK',
+        'Wrapper': 'WRAPPER',
         'Failure': 'FAIL',
         MISSING_KEYWORD: 'MISSING',
         'Pass': 'PASS',
@@ -893,6 +894,7 @@ class TestExpectations(object):
         'timeout': TIMEOUT,
         'crash': CRASH,
         'leak': LEAK,
+        'wrapper': WRAPPER,
         'missing': MISSING,
         TestExpectationParser.SKIP_MODIFIER: SKIP,
         TestExpectationParser.WONTFIX_MODIFIER: WONTFIX,
@@ -912,6 +914,7 @@ class TestExpectations(object):
         AUDIO: 'audio failures',
         CRASH: 'crashes',
         LEAK: 'leaks',
+        WRAPPER: 'wrapper',
         TIMEOUT: 'timeouts',
         MISSING: 'missing results',
     }

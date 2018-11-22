@@ -43,6 +43,8 @@ component("controller") {
     "controller_export.h",
     "dev_tools_frontend_impl.cc",
     "dev_tools_frontend_impl.h",
+    "wrapper_counter.h",
+    "wrapper_counter.cc",
   ]
 
   if (is_android) {

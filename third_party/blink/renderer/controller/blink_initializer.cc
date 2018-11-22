@@ -40,6 +40,7 @@
 #include "third_party/blink/renderer/bindings/core/v8/v8_initializer.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_context_snapshot_external_references.h"
 #include "third_party/blink/renderer/controller/blink_leak_detector.h"
+#include "third_party/blink/renderer/controller/wrapper_counter.h"
 #include "third_party/blink/renderer/controller/bloated_renderer_detector.h"
 #include "third_party/blink/renderer/controller/dev_tools_frontend_impl.h"
 #include "third_party/blink/renderer/core/animation/animation_clock.h"
@@ -178,6 +179,9 @@ void BlinkInitializer::RegisterInterfaces(
   registry.AddInterface(
       ConvertToBaseCallback(CrossThreadBind(&BlinkLeakDetector::Create)),
       main_thread->GetTaskRunner());
+  registry.AddInterface(
+    ConvertToBaseCallback(CrossThreadBind(&WrapperCounter::Create)),
+    main_thread->GetTaskRunner());
 }
 
 void BlinkInitializer::InitLocalFrame(LocalFrame& frame) const {

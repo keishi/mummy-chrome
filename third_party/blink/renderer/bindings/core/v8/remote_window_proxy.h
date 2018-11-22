@@ -57,6 +57,7 @@ class RemoteWindowProxy final : public WindowProxy {
  private:
   void Initialize() override;
   void DisposeContext(Lifecycle next_status, FrameReuseStatus) override;
+  void ReleaseContext(bool) override {}
 
   // Creates a new v8::Context with the window wrapper object as the global
   // object (aka the inner global).  Note that the window wrapper and its

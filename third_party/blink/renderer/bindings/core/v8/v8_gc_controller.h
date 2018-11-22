@@ -69,6 +69,9 @@ class CORE_EXPORT V8GCController {
   // Called upon terminating a thread when Oilpan clears references from V8
   // wrappers to DOM wrappables.
   static void ClearDOMWrappers(v8::Isolate*);
+
+  static void FindPersistentLeaks(v8::Isolate*);
+  static int CountDOMWrappers(v8::Isolate*);
 };
 
 }  // namespace blink

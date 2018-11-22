@@ -73,6 +73,8 @@ class LocalWindowProxy final : public WindowProxy {
   // (e.g., after setting docoument.domain).
   void UpdateSecurityOrigin(const SecurityOrigin*);
 
+  void ReleaseContext(bool detach_global_object) override;
+
  private:
   bool IsLocal() const override { return true; }
   void Initialize() override;

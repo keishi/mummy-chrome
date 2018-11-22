@@ -268,6 +268,10 @@ class SingleTestRunner(object):
             failures.append(test_failures.FailureLeak(bool(reference_filename),
                                                       driver_output.leak_log))
             _log.debug('%s %s leaked', self._worker_name, testname)
+        elif driver_output.wrapper:
+            failures.append(test_failures.FailureWrapper(bool(reference_filename),
+                                                      driver_output.wrapper_log))
+            _log.debug('%s %s wrapper', self._worker_name, testname)
         elif driver_output.error:
             _log.debug('%s %s output stderr lines:', self._worker_name, testname)
         for line in driver_output.error.splitlines():

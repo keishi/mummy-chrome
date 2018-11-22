@@ -79,6 +79,23 @@ void LocalWindowProxy::DisposeContext(Lifecycle next_status,
   if (lifecycle_ != Lifecycle::kContextIsInitialized)
     return;
 
+  ReleaseContext(next_status == Lifecycle::kFrameIsDetached);
+
+  if (next_status == Lifecycle::kFrameIsDetached) {
+    // The context's frame is detached from the DOM, so there shouldn't be a
+    // strong reference to the context.
+    global_proxy_.SetPhantom();
+  }
+
+  DCHECK_EQ(lifecycle_, Lifecycle::kContextIsInitialized);
+  lifecycle_ = next_status;
+}
+
+void LocalWindowProxy::ReleaseContext(bool detach_global_object) {
+  // FIXME: Duplicate with LocalWindowProxy::DisposeContext
+  if (lifecycle_ != Lifecycle::kContextIsInitialized)
+    return;
+
   ScriptState::Scope scope(script_state_);
   v8::Local<v8::Context> context = script_state_->GetContext();
   // The embedder could run arbitrary code in response to the
@@ -87,7 +104,7 @@ void LocalWindowProxy::DisposeContext(Lifecycle next_status,
   GetFrame()->Client()->WillReleaseScriptContext(context, world_->GetWorldId());
   MainThreadDebugger::Instance()->ContextWillBeDestroyed(script_state_);
 
-  if (next_status == Lifecycle::kGlobalObjectIsDetached) {
+  if (detach_global_object) {
     // Clean up state on the global proxy, which will be reused.
     if (!global_proxy_.IsEmpty()) {
       CHECK(global_proxy_ == context->Global());
@@ -109,16 +126,7 @@ void LocalWindowProxy::DisposeContext(Lifecycle next_status,
   // garbage. Notify V8 about this so it'll have a chance of cleaning
   // it up when idle.
   V8GCForContextDispose::Instance().NotifyContextDisposed(
-      GetFrame()->IsMainFrame(), frame_reuse_status);
-
-  if (next_status == Lifecycle::kFrameIsDetached) {
-    // The context's frame is detached from the DOM, so there shouldn't be a
-    // strong reference to the context.
-    global_proxy_.SetPhantom();
-  }
-
-  DCHECK_EQ(lifecycle_, Lifecycle::kContextIsInitialized);
-  lifecycle_ = next_status;
+      GetFrame()->IsMainFrame(), kFrameWillBeReused);
 }
 
 void LocalWindowProxy::Initialize() {

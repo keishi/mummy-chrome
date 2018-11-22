@@ -25,4 +25,6 @@ struct LeakDetectionResult {
 // before reporting various Blink's objects counters.
 interface LeakDetector {
   PerformLeakDetection() => (LeakDetectionResult result);
+  Mummify();
+  Demummify();
 };
